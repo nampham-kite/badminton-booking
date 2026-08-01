@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { CourtService } from './court.service';
+import { GetCourtDto } from './dtos/get-court.dto';
 import { CreateCourtDto } from './dtos/update-court.dto';
 @Controller('court')
 export class CourtController {
@@ -9,7 +10,7 @@ export class CourtController {
     return await this.courtService.createCourt(createCourtDto);
   }
   @Get()
-  async getAllCourts() {
-    return await this.courtService.getAllCourts();
+  async getAllCourts(@Query() getCourtDto: GetCourtDto) {
+    return await this.courtService.getAllCourts(getCourtDto);
   }
 }

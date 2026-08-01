@@ -1,14 +1,16 @@
-import { ApiOAuth2, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
-  IsOptional,
-  IsNumber,
-  IsString,
   IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
 } from 'class-validator';
-import { CourtStatus } from 'src/common/constants/common.constant';
+import { CourtStatus } from '../../../common/constants/common.constant';
 
 export class CreateCourtDto {
   @ApiPropertyOptional({ description: 'The name of the court' })
@@ -101,22 +103,35 @@ export class CreateCourtDto {
   @IsOptional()
   @IsString()
   reasonForMaintenance!: string;
-  @ApiPropertyOptional({ description: 'The time slots of the court' })
+  @ApiPropertyOptional({
+    description: 'The time slots of the court',
+    example: [
+      {
+        start: 10,
+        end: 12,
+        price: 100,
+      },
+    ],
+    isArray: true,
+  })
+  @ValidateNested({ each: true })
+  @IsArray()
   @IsOptional()
   @Type(() => TimeSlotDto)
-  timeSlots!: TimeSlotDto[];
+  timeSlots?: TimeSlotDto[];
 }
+
 export class TimeSlotDto {
-  @ApiProperty({ description: 'The start time of the time slot' })
+  @ApiProperty({ description: 'The start of the time slot' })
   @IsNotEmpty()
-  @IsString()
-  startTime!: number;
-  @ApiProperty({ description: 'The end time of the time slot' })
+  @IsNumber()
+  start!: number;
+  @ApiProperty({ description: 'The end of the time slot' })
   @IsNotEmpty()
-  @IsString()
-  endTime!: number;
+  @IsNumber()
+  end!: number;
   @ApiProperty({ description: 'The price of the time slot' })
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   price!: number;
 }
