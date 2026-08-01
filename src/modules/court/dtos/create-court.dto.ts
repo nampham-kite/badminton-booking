@@ -7,7 +7,10 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { CourtStatus } from '../../../common/constants/common.constant';
+import {
+  CourtStatus,
+  CourtSurface,
+} from '../../../common/constants/common.constant';
 import { TimeSlotDto } from './update-court.dto';
 
 export class CreateCourtDto {
@@ -44,10 +47,10 @@ export class CreateCourtDto {
   @IsNotEmpty()
   @IsNumber()
   peopleCapacity!: number;
-  @ApiProperty({ description: 'The type of the court' })
+  @ApiProperty({ description: 'The surface of the court' })
   @IsNotEmpty()
-  @IsString()
-  courtType!: string;
+  @IsEnum(CourtSurface)
+  surface!: CourtSurface;
   @ApiProperty({ description: 'The height of the roof' })
   @IsNotEmpty()
   @IsNumber()

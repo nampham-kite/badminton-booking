@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, IsNull, Repository } from 'typeorm';
 import { ListResponseDto } from '../../common/dtos/list-respone.dto';
+import { CourtNotFoundException } from '../../common/exceptions/court.exception';
 import { paginate } from '../../common/pagination';
 import { CourtEntity } from '../../databases/entities/court.entity';
 import { TimeSlotEntity } from '../../databases/entities/time-slot.entity';
 import { GetCourtDto } from './dtos/get-court.dto';
 import { CreateCourtDto, TimeSlotDto } from './dtos/update-court.dto';
+
 @Injectable()
 export class CourtService {
   constructor(
@@ -68,7 +70,7 @@ export class CourtService {
     });
     console.log('court', court);
     if (!court) {
-      throw new NotFoundException('Court not found');
+      throw new CourtNotFoundException();
     }
     return court;
   }

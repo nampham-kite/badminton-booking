@@ -28,7 +28,7 @@ export class CourtEntity extends BaseEntity {
   @Column()
   peopleCapacity!: number;
   @Column()
-  courtType!: string;
+  surface!: string;
   @Column()
   roofHeight!: number;
   @Column()

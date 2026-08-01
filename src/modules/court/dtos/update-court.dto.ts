@@ -10,7 +10,10 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CourtStatus } from '../../../common/constants/common.constant';
+import {
+  CourtStatus,
+  CourtSurface,
+} from '../../../common/constants/common.constant';
 
 export class CreateCourtDto {
   @ApiPropertyOptional({ description: 'The name of the court' })
@@ -57,10 +60,10 @@ export class CreateCourtDto {
   @IsOptional()
   @IsNumber()
   peopleCapacity!: number;
-  @ApiPropertyOptional({ description: 'The type of the court' })
+  @ApiPropertyOptional({ description: 'The surface of the court' })
   @IsOptional()
-  @IsString()
-  courtType!: string;
+  @IsEnum(CourtSurface)
+  surface!: CourtSurface;
   @ApiPropertyOptional({ description: 'The height of the roof' })
   @IsOptional()
   @IsNumber()
