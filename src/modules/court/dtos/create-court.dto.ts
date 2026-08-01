@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -6,9 +7,8 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { CourtStatus } from 'src/common/constants/common.constant';
+import { CourtStatus } from '../../../common/constants/common.constant';
 import { TimeSlotDto } from './update-court.dto';
-import { Type } from 'class-transformer';
 
 export class CreateCourtDto {
   @ApiProperty({ description: 'The name of the court' })

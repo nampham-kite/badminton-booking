@@ -1,9 +1,12 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { CourtEntity } from 'src/databases/entities/court.entity';
-import { In, Repository } from 'typeorm';
-import { CreateCourtDto, TimeSlotDto } from './dtos/update-court.dto';
-import { TimeSlotEntity } from 'src/databases/entities/time-slot.entity';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ILike, IsNull, Repository } from 'typeorm';
+import { ListResponseDto } from '../../common/dtos/list-respone.dto';
+import { paginate } from '../../common/pagination';
+import { CourtEntity } from '../../databases/entities/court.entity';
+import { TimeSlotEntity } from '../../databases/entities/time-slot.entity';
+import { GetCourtDto } from './dtos/get-court.dto';
+import { CreateCourtDto, TimeSlotDto } from './dtos/update-court.dto';
 @Injectable()
 export class CourtService {
   constructor(
@@ -24,15 +27,17 @@ export class CourtService {
     //Luu court vao database
     const createdCourt = await this.courtRepository.save(court);
     // Tao time slots cho court moi tao
-    const timeSlotEntities = timeSlots.map((timeSlotDto: TimeSlotDto) => {
-      const timeSlot = this.timeSlotRepository.create({
-        ...timeSlotDto,
-        court: createdCourt,
+    if (timeSlots) {
+      const timeSlotEntities = timeSlots?.map((timeSlotDto: TimeSlotDto) => {
+        const timeSlot = this.timeSlotRepository.create({
+          ...timeSlotDto,
+          court: createdCourt,
+        });
+        return timeSlot;
       });
-      return timeSlot;
-    });
-    //Luu time slots vao database
-    await this.timeSlotRepository.save(timeSlotEntities);
+      //Luu time slots vao database
+      await this.timeSlotRepository.save(timeSlotEntities);
+    }
 
     return createdCourt;
   }
@@ -45,9 +50,15 @@ export class CourtService {
         .padStart(6, '0')
     );
   }
-  async getAllCourts(): Promise<CourtEntity[]> {
-    return await this.courtRepository.find({
-      relations: { timeSlots: true },
-    });
+  async getAllCourts(
+    getCourtDto: GetCourtDto,
+  ): Promise<ListResponseDto<CourtEntity>> {
+    const { page, limit, name } = getCourtDto;
+    return await paginate<CourtEntity>(
+      this.courtRepository,
+      { page, limit },
+      { deletedAt: IsNull(), ...(name && { name: ILike(`%${name}%`) }) },
+      { timeSlots: true },
+    );
   }
 }
