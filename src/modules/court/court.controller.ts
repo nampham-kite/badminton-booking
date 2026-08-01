@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CourtService } from './court.service';
 import { GetCourtDto } from './dtos/get-court.dto';
 import { CreateCourtDto } from './dtos/update-court.dto';
@@ -12,5 +20,9 @@ export class CourtController {
   @Get()
   async getAllCourts(@Query() getCourtDto: GetCourtDto) {
     return await this.courtService.getAllCourts(getCourtDto);
+  }
+  @Get(':id')
+  async getCourt(@Param('id', ParseIntPipe) id: number) {
+    return await this.courtService.getCourt(id);
   }
 }

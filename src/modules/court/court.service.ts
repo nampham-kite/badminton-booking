@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, IsNull, Repository } from 'typeorm';
 import { ListResponseDto } from '../../common/dtos/list-respone.dto';
@@ -60,5 +60,16 @@ export class CourtService {
       { deletedAt: IsNull(), ...(name && { name: ILike(`%${name}%`) }) },
       { timeSlots: true },
     );
+  }
+  async getCourt(id: number): Promise<CourtEntity> {
+    const court = await this.courtRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+      relations: { timeSlots: true },
+    });
+    console.log('court', court);
+    if (!court) {
+      throw new NotFoundException('Court not found');
+    }
+    return court;
   }
 }
