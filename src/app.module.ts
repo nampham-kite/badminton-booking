@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import {
+  addTransactionalDataSource,
+  getDataSourceByName,
+} from 'typeorm-transactional';
 import { CourtModule } from './modules/court/court.module';
 
 @Module({
@@ -24,6 +29,16 @@ import { CourtModule } from './modules/court/court.module';
         synchronize: true,
         entities: [__dirname + '/databases/entities/*.entity{.ts,.js}'],
       }),
+      async dataSourceFactory(options) {
+        if (!options) {
+          throw new Error('Invalid options passed');
+        }
+        const existing = getDataSourceByName('default');
+        if (existing) {
+          return existing;
+        }
+        return addTransactionalDataSource(new DataSource(options));
+      },
     }),
   ],
 })

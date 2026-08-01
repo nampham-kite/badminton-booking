@@ -21,15 +21,15 @@ export class CourtEntity extends BaseEntity {
 
   @Column({ nullable: true })
   description!: string;
-  @Column()
+  @Column({ type: 'float' })
   width!: number;
-  @Column()
+  @Column({ type: 'float' })
   height!: number;
   @Column()
   peopleCapacity!: number;
   @Column()
   surface!: string;
-  @Column()
+  @Column({ type: 'float' })
   roofHeight!: number;
   @Column()
   isIndoor!: boolean;
@@ -45,7 +45,7 @@ export class CourtEntity extends BaseEntity {
   openingHours!: string;
   @Column()
   endingHours!: string;
-  @Column()
+  @Column({ nullable: true })
   reasonForMaintenance!: string;
   @OneToMany(() => TimeSlotEntity, (timeSlot) => timeSlot.court)
   timeSlots!: TimeSlotEntity[]; // Assuming timeSlots is an array of TimeSlotEntity

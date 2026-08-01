@@ -1,10 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import {
@@ -82,10 +83,10 @@ export class CreateCourtDto {
   @IsNotEmpty()
   @IsString()
   endingHours!: string;
-  @ApiProperty({ description: 'The reason for maintenance' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: 'The reason for maintenance' })
+  @IsOptional()
   @IsString()
-  reasonForMaintenance!: string;
+  reasonForMaintenance?: string;
   @ApiProperty({ description: 'The time slots of the court' })
   @IsNotEmpty()
   @Type(() => TimeSlotDto)

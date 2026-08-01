@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, IsNull, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
@@ -21,27 +21,33 @@ export class CourtService {
 
   @Transactional()
   async createCourt(createCourtDto: CreateCourtDto): Promise<CourtEntity> {
-    const { timeSlots, ...courtData } = createCourtDto;
-    // Tạo court mới từ dữ liệu trong createCourtDto
-    const courtCode = this.genarateCoutrCode();
-    const dataSave = { ...courtData, courtCode };
-    const court = this.courtRepository.create(dataSave);
-    //Luu court vao database
-    const createdCourt = await this.courtRepository.save(court);
-    // Tao time slots cho court moi tao
-    if (timeSlots) {
-      const timeSlotEntities = timeSlots?.map((timeSlotDto: TimeSlotDto) => {
-        const timeSlot = this.timeSlotRepository.create({
-          ...timeSlotDto,
-          court: createdCourt,
+    console.log('createCourtDto', createCourtDto);
+    try {
+      const { timeSlots, ...courtData } = createCourtDto;
+      // Tạo court mới từ dữ liệu trong createCourtDto
+      const courtCode = this.genarateCoutrCode();
+      const dataSave = { ...courtData, courtCode };
+      const court = this.courtRepository.create(dataSave);
+      //Luu court vao database
+      const createdCourt = await this.courtRepository.save(court);
+      // Tao time slots cho court moi tao
+      if (timeSlots) {
+        const timeSlotEntities = timeSlots?.map((timeSlotDto: TimeSlotDto) => {
+          const timeSlot = this.timeSlotRepository.create({
+            ...timeSlotDto,
+            court: createdCourt,
+          });
+          return timeSlot;
         });
-        return timeSlot;
-      });
-      //Luu time slots vao database
-      await this.timeSlotRepository.save(timeSlotEntities);
-    }
+        //Luu time slots vao database
+        await this.timeSlotRepository.save(timeSlotEntities);
+      }
 
-    return createdCourt;
+      return createdCourt;
+    } catch (error) {
+      console.log('error', (error as Error).message);
+      throw new InternalServerErrorException();
+    }
   }
 
   genarateCoutrCode(): string {
