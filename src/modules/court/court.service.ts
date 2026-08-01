@@ -97,6 +97,7 @@ export class CourtService {
     //remove old time slots hard delete
     await this.timeSlotRepository.delete({ court: { id } });
 
+    console.log('timeSlots', timeSlots);
     if (timeSlots) {
       const timeSlotEntities = timeSlots?.map((timeSlotDto: TimeSlotDto) => {
         const timeSlot = this.timeSlotRepository.create({
@@ -105,6 +106,7 @@ export class CourtService {
         });
         return timeSlot;
       });
+      await this.timeSlotRepository.save(timeSlotEntities);
     }
     const updatedCourt = await this.courtRepository.save({
       ...court,
