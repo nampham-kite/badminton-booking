@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, IsNull, Repository } from 'typeorm';
+import { Transactional } from 'typeorm-transactional';
 import { ListResponseDto } from '../../common/dtos/list-respone.dto';
 import { CourtNotFoundException } from '../../common/exceptions/court.exception';
 import { paginate } from '../../common/pagination';
 import { CourtEntity } from '../../databases/entities/court.entity';
 import { TimeSlotEntity } from '../../databases/entities/time-slot.entity';
+import { CreateCourtDto, TimeSlotDto } from './dtos/create-court.dto';
 import { GetCourtDto } from './dtos/get-court.dto';
-import { CreateCourtDto, TimeSlotDto } from './dtos/update-court.dto';
-
+import { UpdateCourtDto } from './dtos/update-court.dto';
 @Injectable()
 export class CourtService {
   constructor(
@@ -18,14 +19,13 @@ export class CourtService {
     private readonly timeSlotRepository: Repository<TimeSlotEntity>,
   ) {}
 
+  @Transactional()
   async createCourt(createCourtDto: CreateCourtDto): Promise<CourtEntity> {
     const { timeSlots, ...courtData } = createCourtDto;
     // Tạo court mới từ dữ liệu trong createCourtDto
     const courtCode = this.genarateCoutrCode();
     const dataSave = { ...courtData, courtCode };
-    // console.log('dataSave', dataSave);
     const court = this.courtRepository.create(dataSave);
-    console.log('court', court);
     //Luu court vao database
     const createdCourt = await this.courtRepository.save(court);
     // Tao time slots cho court moi tao
@@ -55,14 +55,15 @@ export class CourtService {
   async getAllCourts(
     getCourtDto: GetCourtDto,
   ): Promise<ListResponseDto<CourtEntity>> {
-    const { page, limit, name } = getCourtDto;
+    const { name, ...paginationDto } = getCourtDto;
     return await paginate<CourtEntity>(
       this.courtRepository,
-      { page, limit },
+      paginationDto,
       { deletedAt: IsNull(), ...(name && { name: ILike(`%${name}%`) }) },
       { timeSlots: true },
     );
   }
+
   async getCourt(id: number): Promise<CourtEntity> {
     const court = await this.courtRepository.findOne({
       where: { id, deletedAt: IsNull() },
@@ -73,5 +74,48 @@ export class CourtService {
       throw new CourtNotFoundException();
     }
     return court;
+  }
+
+  @Transactional()
+  async updateCourt(
+    id: number,
+    updateCourtDto: UpdateCourtDto,
+  ): Promise<CourtEntity> {
+    const { timeSlots, ...courtData } = updateCourtDto;
+    const court = await this.courtRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+    });
+    if (!court) {
+      throw new CourtNotFoundException();
+    }
+    //remove old time slots hard delete
+    await this.timeSlotRepository.delete({ court: { id } });
+
+    if (timeSlots) {
+      const timeSlotEntities = timeSlots?.map((timeSlotDto: TimeSlotDto) => {
+        const timeSlot = this.timeSlotRepository.create({
+          ...timeSlotDto,
+          court: court,
+        });
+        return timeSlot;
+      });
+    }
+    const updatedCourt = await this.courtRepository.save({
+      ...court,
+      ...courtData,
+    });
+    return updatedCourt;
+  }
+
+  @Transactional()
+  async deleteCourt(id: number): Promise<void> {
+    const court = await this.courtRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+    });
+    if (!court) {
+      throw new CourtNotFoundException();
+    }
+    await this.courtRepository.softDelete(id);
+    await this.timeSlotRepository.softDelete({ court: { id } });
   }
 }

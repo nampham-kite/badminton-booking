@@ -11,7 +11,6 @@ import {
   CourtStatus,
   CourtSurface,
 } from '../../../common/constants/common.constant';
-import { TimeSlotDto } from './update-court.dto';
 
 export class CreateCourtDto {
   @ApiProperty({ description: 'The name of the court' })
@@ -91,4 +90,19 @@ export class CreateCourtDto {
   @IsNotEmpty()
   @Type(() => TimeSlotDto)
   timeSlots!: TimeSlotDto[];
+}
+
+export class TimeSlotDto {
+  @ApiProperty({ description: 'The start of the time slot' })
+  @IsNotEmpty()
+  @IsNumber()
+  start!: number;
+  @ApiProperty({ description: 'The end of the time slot' })
+  @IsNotEmpty()
+  @IsNumber()
+  end!: number;
+  @ApiProperty({ description: 'The price of the time slot' })
+  @IsNotEmpty()
+  @IsNumber()
+  price!: number;
 }
