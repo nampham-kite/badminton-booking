@@ -7,6 +7,7 @@ import {
   getDataSourceByName,
 } from 'typeorm-transactional';
 import { CourtModule } from './modules/court/court.module';
+import { DeviceModule } from './modules/devices/device-module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CourtModule } from './modules/court/court.module';
       envFilePath: '.env',
     }),
     CourtModule,
+    DeviceModule,
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
