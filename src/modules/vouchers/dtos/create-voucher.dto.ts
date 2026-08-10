@@ -1,5 +1,17 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  VoucherStatus,
+  VoucherType,
+} from 'src/common/constants/common.constant';
 
 export class CreateVoucherDto {
   @ApiProperty({ description: 'Mã voucher', example: 'WELCOME10' })
@@ -7,10 +19,14 @@ export class CreateVoucherDto {
   @IsString()
   code!: string;
 
-  @ApiProperty({ description: 'Loại voucher: % hoặc Cố định', example: '%' })
+  @ApiProperty({
+    description: 'Loại voucher',
+    enum: VoucherType,
+    example: VoucherType.PERCENT,
+  })
   @IsNotEmpty()
-  @IsString()
-  type!: string;
+  @IsEnum(VoucherType, { message: 'Invalid voucher type' })
+  type!: VoucherType;
 
   @ApiProperty({ description: 'Giá trị giảm', example: 10 })
   @IsNotEmpty()
@@ -46,8 +62,12 @@ export class CreateVoucherDto {
   @IsDateString()
   endDate!: string;
 
-  @ApiProperty({ description: 'Trạng thái', example: 'Hoạt động' })
+  @ApiProperty({
+    description: 'Trạng thái',
+    enum: VoucherStatus,
+    example: VoucherStatus.ACTIVE,
+  })
   @IsNotEmpty()
-  @IsString()
-  status!: string;
+  @IsEnum(VoucherStatus, { message: 'Invalid voucher status' })
+  status!: VoucherStatus;
 }

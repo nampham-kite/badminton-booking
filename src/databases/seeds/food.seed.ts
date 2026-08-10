@@ -1,39 +1,43 @@
 import { FoodEntity } from '../entities/food.entity';
+import {
+  CatalogStatus,
+  FoodCategory,
+} from '../../common/constants/common.constant';
 
 export const foodSeedData: Partial<FoodEntity>[] = [
   {
     name: 'Nước suối',
-    category: 'Đồ uống',
+    category: FoodCategory.DRINK,
     price: 10000,
     stock: 100,
-    status: 'Hoạt động',
+    status: CatalogStatus.ACTIVE,
   },
   {
     name: 'Sting',
-    category: 'Đồ uống',
+    category: FoodCategory.DRINK,
     price: 15000,
     stock: 50,
-    status: 'Hoạt động',
+    status: CatalogStatus.ACTIVE,
   },
   {
     name: 'Mì ly',
-    category: 'Đồ ăn',
+    category: FoodCategory.FOOD,
     price: 20000,
     stock: 30,
-    status: 'Hoạt động',
+    status: CatalogStatus.ACTIVE,
   },
   {
     name: 'Bánh mì',
-    category: 'Đồ ăn',
+    category: FoodCategory.FOOD,
     price: 25000,
     stock: 40,
-    status: 'Hoạt động',
+    status: CatalogStatus.ACTIVE,
   },
   {
     name: 'Trà đá',
-    category: 'Đồ uống',
+    category: FoodCategory.DRINK,
     price: 5000,
     stock: 200,
-    status: 'Hoạt động',
+    status: CatalogStatus.ACTIVE,
   },
 ];

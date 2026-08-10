@@ -1,5 +1,9 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  CatalogStatus,
+  FoodCategory,
+} from 'src/common/constants/common.constant';
 
 export class CreateFoodDto {
   @ApiProperty({ description: 'Tên món', example: 'Nước suối' })
@@ -7,10 +11,14 @@ export class CreateFoodDto {
   @IsString()
   name!: string;
 
-  @ApiProperty({ description: 'Danh mục', example: 'Đồ uống' })
+  @ApiProperty({
+    description: 'Danh mục',
+    enum: FoodCategory,
+    example: FoodCategory.DRINK,
+  })
   @IsNotEmpty()
-  @IsString()
-  category!: string;
+  @IsEnum(FoodCategory, { message: 'Invalid food category' })
+  category!: FoodCategory;
 
   @ApiProperty({ description: 'Giá', example: 10000 })
   @IsNotEmpty()
@@ -22,8 +30,12 @@ export class CreateFoodDto {
   @IsNumber()
   stock!: number;
 
-  @ApiProperty({ description: 'Trạng thái', example: 'Hoạt động' })
+  @ApiProperty({
+    description: 'Trạng thái',
+    enum: CatalogStatus,
+    example: CatalogStatus.ACTIVE,
+  })
   @IsNotEmpty()
-  @IsString()
-  status!: string;
+  @IsEnum(CatalogStatus, { message: 'Invalid food status' })
+  status!: CatalogStatus;
 }
