@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CatalogStatus } from 'src/common/constants/common.constant';
 
 export class CreateBannerDto {
   @ApiProperty({ description: 'Thứ tự hiển thị', example: 1 })
@@ -13,7 +14,11 @@ export class CreateBannerDto {
   @IsString()
   title!: string;
 
-  @ApiProperty({ description: 'Đường dẫn ảnh', example: '/banners/weekend.jpg' })
+  @ApiProperty({
+    description: 'Đường dẫn ảnh',
+    example:
+      'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1800&q=80',
+  })
   @IsNotEmpty()
   @IsString()
   image!: string;
@@ -23,8 +28,12 @@ export class CreateBannerDto {
   @IsString()
   link!: string;
 
-  @ApiProperty({ description: 'Trạng thái', example: 'Hoạt động' })
+  @ApiProperty({
+    description: 'Trạng thái',
+    enum: CatalogStatus,
+    example: CatalogStatus.ACTIVE,
+  })
   @IsNotEmpty()
-  @IsString()
-  status!: string;
+  @IsEnum(CatalogStatus, { message: 'Invalid banner status' })
+  status!: CatalogStatus;
 }

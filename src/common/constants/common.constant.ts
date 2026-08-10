@@ -39,3 +39,9 @@ export enum VoucherStatus {
   INACTIVE = 'inactive',
   DRAFT = 'draft',
 }
+
+export enum ActivityStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DRAFT = 'draft',
+}
