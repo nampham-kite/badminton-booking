@@ -5,3 +5,10 @@ export class DeviceNotFoundException extends HttpException {
     super('Device not found', 404);
   }
 }
+
+
+export class DeviceSkuAlreadyExistsException extends HttpException {
+  constructor() {
+    super('Device SKU already exists', 400);
+  }
+}

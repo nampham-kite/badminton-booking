@@ -1,0 +1,48 @@
+import { VoucherEntity } from '../entities/voucher.entity';
+
+export const voucherSeedData: Partial<VoucherEntity>[] = [
+  {
+    code: 'WELCOME10',
+    type: '%',
+    value: 10,
+    minOrderAmount: 100000,
+    usedCount: 23,
+    maxUsage: 100,
+    startDate: new Date('2026-07-01'),
+    endDate: new Date('2026-08-31'),
+    status: 'Hoạt động',
+  },
+  {
+    code: 'FIXED50K',
+    type: 'Cố định',
+    value: 50000,
+    minOrderAmount: 200000,
+    usedCount: 50,
+    maxUsage: 50,
+    startDate: new Date('2026-06-01'),
+    endDate: new Date('2026-07-15'),
+    status: 'Ngưng',
+  },
+  {
+    code: 'DRAFT20',
+    type: '%',
+    value: 20,
+    minOrderAmount: 0,
+    usedCount: 0,
+    maxUsage: 20,
+    startDate: new Date('2026-08-01'),
+    endDate: new Date('2026-08-31'),
+    status: 'Nháp',
+  },
+  {
+    code: 'WEEKEND15',
+    type: '%',
+    value: 15,
+    minOrderAmount: 150000,
+    usedCount: 5,
+    maxUsage: 200,
+    startDate: new Date('2026-08-01'),
+    endDate: new Date('2026-12-31'),
+    status: 'Hoạt động',
+  },
+];
