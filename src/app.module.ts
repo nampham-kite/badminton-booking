@@ -8,6 +8,7 @@ import {
 } from 'typeorm-transactional';
 import { CourtModule } from './modules/court/court.module';
 import { DeviceModule } from './modules/devices/device-module';
+import { UserModule } from './modules/users/user-module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { DeviceModule } from './modules/devices/device-module';
     }),
     CourtModule,
     DeviceModule,
+    UserModule,
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
