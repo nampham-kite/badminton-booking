@@ -9,6 +9,10 @@ import {
 import { CourtModule } from './modules/court/court.module';
 import { DeviceModule } from './modules/devices/device-module';
 import { UserModule } from './modules/users/user-module';
+import { FoodModule } from './modules/foods/food-module';
+import { VoucherModule } from './modules/vouchers/voucher-module';
+import { BannerModule } from './modules/banners/banner-module';
+import { ActivityModule } from './modules/activities/activity-module';
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import { UserModule } from './modules/users/user-module';
     CourtModule,
     DeviceModule,
     UserModule,
+    FoodModule,
+    VoucherModule,
+    BannerModule,
+    ActivityModule,
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
