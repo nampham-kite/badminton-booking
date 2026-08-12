@@ -13,6 +13,10 @@ import { FoodModule } from './modules/foods/food-module';
 import { VoucherModule } from './modules/vouchers/voucher-module';
 import { BannerModule } from './modules/banners/banner-module';
 import { ActivityModule } from './modules/activities/activity-module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './guards/auth.guard';
+import { JwtModule } from '@nestjs/jwt';
+import { UserService } from './modules/users/user.service';
 
 @Module({
   imports: [
@@ -27,6 +31,14 @@ import { ActivityModule } from './modules/activities/activity-module';
     VoucherModule,
     BannerModule,
     ActivityModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+    }),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -52,6 +64,12 @@ import { ActivityModule } from './modules/activities/activity-module';
         return addTransactionalDataSource(new DataSource(options));
       },
     }),
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}
