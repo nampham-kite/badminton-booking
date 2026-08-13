@@ -13,3 +13,12 @@ export class CourtNotFoundException extends HttpException {
     );
   }
 }
+
+export class CourtNotActiveException extends HttpException {
+  constructor() {
+    super(
+      ErrorMessage[ErrorCode.COURT_NOT_ACTIVE],
+      ErrorStatus[ErrorCode.COURT_NOT_ACTIVE],
+    );
+  }
+}

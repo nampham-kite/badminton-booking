@@ -17,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guards/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from './modules/users/user.service';
+import { BookingModule } from './modules/bookings/booking-module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UserService } from './modules/users/user.service';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    BookingModule,
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

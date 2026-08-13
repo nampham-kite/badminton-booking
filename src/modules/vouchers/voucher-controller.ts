@@ -16,11 +16,12 @@ import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 import { VoucherEntity } from 'src/databases/entities/voucher.entity';
 import { ListResponseDto } from 'src/common/dtos/list-respone.dto';
 import { ApiBearerAuth } from 'node_modules/@nestjs/swagger/dist/decorators/api-bearer.decorator';
+import { isPublic } from 'src/decorators/is-public.decorator';
 
 @Controller('vouchers')
 export class VoucherController {
   constructor(private readonly voucherService: VoucherService) {}
-  @ApiBearerAuth()
+  @isPublic()
   @Get()
   async getAllVouchers(
     @Query() getVoucherDto: GetVoucherDto,

@@ -14,6 +14,7 @@ import { CreateCourtDto } from './dtos/create-court.dto';
 import { GetCourtDto } from './dtos/get-court.dto';
 import { UpdateCourtDto } from './dtos/update-court.dto';
 import { ApiBearerAuth } from 'node_modules/@nestjs/swagger/dist/decorators/api-bearer.decorator';
+import { isPublic } from 'src/decorators/is-public.decorator';
 @Controller('court')
 export class CourtController {
   constructor(private readonly courtService: CourtService) {}
@@ -22,7 +23,7 @@ export class CourtController {
   async createCourt(@Body() createCourtDto: CreateCourtDto) {
     return await this.courtService.createCourt(createCourtDto);
   }
-  @ApiBearerAuth()
+  @isPublic()
   @Get()
   async getAllCourts(@Query() getCourtDto: GetCourtDto) {
     return await this.courtService.getAllCourts(getCourtDto);

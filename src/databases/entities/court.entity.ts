@@ -1,9 +1,13 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { TimeSlotEntity } from './time-slot.entity';
+import { BookingEntity } from './booking.entity';
 
 @Entity('courts')
 export class CourtEntity extends BaseEntity {
+  @OneToMany(() => BookingEntity, (booking) => booking.court)
+  bookings!: BookingEntity[];
+
   @Column()
   name!: string;
 

@@ -1,8 +1,12 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { BookingEntity } from './booking.entity';
 
 @Entity('vouchers')
 export class VoucherEntity extends BaseEntity {
+  @ManyToOne(() => BookingEntity, (booking) => booking.voucher)
+  bookings!: BookingEntity[];
+
   @Column({ unique: true })
   code!: string;
 

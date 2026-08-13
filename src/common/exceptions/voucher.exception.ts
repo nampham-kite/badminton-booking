@@ -11,3 +11,15 @@ export class VoucherCodeAlreadyExistsException extends HttpException {
     super('Voucher code already exists', 400);
   }
 }
+
+export class VoucherNotActiveException extends HttpException {
+  constructor() {
+    super('Voucher is not active', 400);
+  }
+}
+
+export class VoucherUsageLimitExceededException extends HttpException {
+  constructor() {
+    super('Voucher usage limit exceeded', 400);
+  }
+}
