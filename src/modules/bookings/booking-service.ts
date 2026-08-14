@@ -1,15 +1,9 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ListResponseDto } from 'src/common/dtos/list-respone.dto';
 import { VoucherEntity } from 'src/databases/entities/voucher.entity';
 import { BookingEntity } from 'src/databases/entities/booking.entity';
-import { Repository } from 'typeorm';
-import { CreateBookingDto } from './dtos/create-booking.dto';
 import { CourtEntity } from 'src/databases/entities/court.entity';
 import { TimeSlotEntity } from 'src/databases/entities/time-slot.entity';
 import {
@@ -25,6 +19,8 @@ import {
   BookingAlreadyExistsException,
   TimeSlotNotAvailableException,
 } from 'src/common/exceptions/booking.exception';
+import { CreateBookingDto } from './dtos/create-booking.dto';
+import { GetBookingDto } from './dtos/get-booking.dto';
 
 @Injectable()
 export class BookingService {
@@ -38,12 +34,55 @@ export class BookingService {
     @InjectRepository(TimeSlotEntity)
     private readonly timeSlotRepository: Repository<TimeSlotEntity>,
   ) {}
+
+  async getBookings(
+    getBookingDto: GetBookingDto,
+  ): Promise<ListResponseDto<BookingEntity>> {
+    const {
+      courtId,
+      orderDate,
+      page = 1,
+      limit = 10,
+      sort = 'createdAt',
+      sortOrder = 'DESC',
+    } = getBookingDto;
+
+    const qb = this.bookingRepository
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.court', 'court')
+      .where('booking.deletedAt IS NULL');
+
+    if (courtId) {
+      qb.andWhere('booking.courtId = :courtId', { courtId });
+    }
+    if (orderDate) {
+      qb.andWhere('DATE(booking.orderDate) = :orderDate', { orderDate });
+    }
+
+    qb.orderBy(`booking.${sort}`, sortOrder)
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+    return { data, total, page, limit };
+  }
+
   async createBooking(
     createBookingDto: CreateBookingDto,
   ): Promise<BookingEntity> {
     const courtId = createBookingDto.courtId;
+    const start = createBookingDto.start;
+    const end = createBookingDto.end;
+
+    if (end <= start) {
+      throw new BadRequestException('End hour must be after start hour');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const orderDate = new Date(createBookingDto.orderDate);
-    if (orderDate < new Date()) {
+    orderDate.setHours(0, 0, 0, 0);
+    if (orderDate < today) {
       throw new BadRequestException('Order date is in the past');
     }
 
@@ -68,36 +107,50 @@ export class BookingService {
       if (voucher.status !== 'active') {
         throw new VoucherNotActiveException();
       }
-      if (voucher.maxUsage < voucher.usedCount) {
+      if (voucher.usedCount >= voucher.maxUsage) {
         throw new VoucherUsageLimitExceededException();
+      }
+      if (createBookingDto.totalPrice < voucher.minOrderAmount) {
+        throw new BadRequestException('Order does not meet voucher minimum');
       }
     }
 
-    const checkBooking = await this.bookingRepository.findOne({
-      where: {
-        court: { id: courtId },
-        orderDate: new Date(createBookingDto.orderDate),
-        start: createBookingDto.start,
-        end: createBookingDto.end,
-      },
-    });
+    const overlap = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .where('booking.courtId = :courtId', { courtId })
+      .andWhere('DATE(booking.orderDate) = :orderDate', {
+        orderDate: createBookingDto.orderDate,
+      })
+      .andWhere('booking.start < :end AND booking.end > :start', { start, end })
+      .andWhere('booking.deletedAt IS NULL')
+      .getOne();
 
-    if (checkBooking) {
+    if (overlap) {
       throw new BookingAlreadyExistsException();
     }
 
-    const checkTimeSlot = await this.timeSlotRepository.findOne({
-      where: {
-        court: { id: courtId },
-        start: createBookingDto.start,
-        end: createBookingDto.end,
-      },
+    const timeSlots = await this.timeSlotRepository.find({
+      where: { court: { id: courtId } },
     });
-    if (!checkTimeSlot) {
-      throw new TimeSlotNotAvailableException();
+    for (let hour = start; hour < end; hour += 1) {
+      const covered = timeSlots.some(
+        (slot) => hour >= slot.start && hour < slot.end,
+      );
+      if (!covered) {
+        throw new TimeSlotNotAvailableException();
+      }
     }
 
-    const booking = this.bookingRepository.create(createBookingDto);
+    const booking = this.bookingRepository.create({
+      court,
+      start,
+      end,
+      orderDate,
+      name: createBookingDto.name,
+      phoneNumber: createBookingDto.phoneNumber,
+      note: createBookingDto.note ?? '',
+      totalPrice: createBookingDto.totalPrice,
+    });
 
     const result = await this.bookingRepository.save(booking);
 
@@ -109,6 +162,9 @@ export class BookingService {
       );
     }
 
-    return result;
+    return await this.bookingRepository.findOneOrFail({
+      where: { id: result.id },
+      relations: { court: true },
+    });
   }
 }

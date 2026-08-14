@@ -1,17 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
-  IsDate,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
-import { BaseEntity } from 'typeorm';
 
 export class CreateBookingDto {
   @ApiProperty({ description: 'ID of the court being booked', example: 1 })
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   courtId!: number;
   @ApiProperty({
     description: 'Date of the booking',
@@ -23,14 +23,17 @@ export class CreateBookingDto {
   @ApiProperty({ description: 'Start time of the booking', example: 9 })
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   start!: number;
   @ApiProperty({ description: 'End time of the booking', example: 10 })
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   end!: number;
   @ApiProperty({ description: 'Total price of the booking', example: 100 })
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   totalPrice!: number;
   @ApiProperty({
     description: 'Name of the person making the booking',

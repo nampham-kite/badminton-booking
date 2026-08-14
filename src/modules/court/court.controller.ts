@@ -28,7 +28,7 @@ export class CourtController {
   async getAllCourts(@Query() getCourtDto: GetCourtDto) {
     return await this.courtService.getAllCourts(getCourtDto);
   }
-  @ApiBearerAuth()
+  @isPublic()
   @Get(':id')
   async getCourt(@Param('id', ParseIntPipe) id: number) {
     return await this.courtService.getCourt(id);
