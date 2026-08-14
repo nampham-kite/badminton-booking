@@ -14,7 +14,6 @@ export class UserController {
   @ApiBearerAuth()
   @Get()
   async getAllUsers(@Query() getUserDto: GetUserDto) {
-    console.log('Start controller getAllUsers');
     return await this.userService.getAllUsers(getUserDto);
   }
 

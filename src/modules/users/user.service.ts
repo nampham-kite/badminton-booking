@@ -6,7 +6,7 @@ import {
 import { GetUserDto } from './dtos/get-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/databases/entities/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { paginate } from 'src/common/pagination';
@@ -19,6 +19,8 @@ type PublicUser = {
   id: number;
   email: string;
   name: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 type AuthTokens = {
@@ -33,11 +35,15 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
-  async getAllUsers(getUserDto: GetUserDto): Promise<ListResponseDto<User>> {
+  async getAllUsers(getUserDto: GetUserDto): Promise<ListResponseDto<PublicUser>> {
     const { name, ...rest } = getUserDto;
-    const where = name ? { name } : {};
+    const where = name ? { name: ILike(`%${name}%`) } : {};
 
-    return await paginate<User>(this.userRepository, rest, where, {});
+    const result = await paginate<User>(this.userRepository, rest, where, {});
+    return {
+      ...result,
+      data: result.data.map((user) => this.toPublicUser(user)),
+    };
   }
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -103,6 +109,8 @@ export class UserService {
       id: user.id,
       email: user.email,
       name: user.name,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 
