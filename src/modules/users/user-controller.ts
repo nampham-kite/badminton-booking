@@ -1,13 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { GetUserDto } from './dtos/get-user.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginDto } from './dtos/login.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { isPublic } from 'src/decorators/is-public.decorator';
+import { RegisterDto } from './dtos/register.dto';
 
 @Controller('users')
 export class UserController {
@@ -23,6 +22,12 @@ export class UserController {
   @ApiBearerAuth()
   async createUser(@Body() createUserDto: CreateUserDto) {
     return await this.userService.createUser(createUserDto);
+  }
+
+  @Post('register')
+  @isPublic()
+  async register(@Body() registerDto: RegisterDto) {
+    return await this.userService.register(registerDto);
   }
 
   @Post('login')

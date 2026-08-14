@@ -42,7 +42,7 @@ export class AuthGuard implements CanActivate {
     const token = header && header.split(' ')[1];
     //decode the token and verify its validity
     const decoded = this.jwtService.verify(token, {
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET || 'badminton-booking-dev-secret',
     });
 
     const { sub } = decoded;

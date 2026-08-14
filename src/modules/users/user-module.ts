@@ -16,7 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('JWT_SECRET') || 'badminton-booking-dev-secret',
         signOptions: { expiresIn: '1h' },
       }),
     }),

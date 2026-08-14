@@ -36,7 +36,7 @@ import { BookingModule } from './modules/bookings/booking-module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('JWT_SECRET') || 'badminton-booking-dev-secret',
         signOptions: { expiresIn: '1h' },
       }),
     }),
