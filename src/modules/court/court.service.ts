@@ -71,14 +71,26 @@ export class CourtService {
   }
 
   async getCourt(id: number): Promise<CourtEntity> {
-    const court = await this.courtRepository.findOne({
-      where: { id, deletedAt: IsNull() },
-      relations: { timeSlots: true },
-    });
-    console.log('court', court);
+    const court = await this.courtRepository
+      .createQueryBuilder('court')
+      .leftJoinAndSelect(
+        'court.timeSlots',
+        'slot',
+        'slot.deletedAt IS NULL',
+      )
+      .where('court.id = :id', { id })
+      .andWhere('court.deletedAt IS NULL')
+      .orderBy('slot.start', 'ASC')
+      .getOne();
     if (!court) {
       throw new CourtNotFoundException();
     }
+    court.timeSlots = (court.timeSlots || []).map((slot) => {
+      const { court: _court, ...rest } = slot as TimeSlotEntity & {
+        court?: CourtEntity;
+      };
+      return rest as TimeSlotEntity;
+    });
     return court;
   }
 
