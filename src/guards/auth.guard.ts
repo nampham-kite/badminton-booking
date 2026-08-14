@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
 import { UserService } from 'src/modules/users/user.service';
 
 @Injectable()
@@ -16,42 +15,51 @@ export class AuthGuard implements CanActivate {
     private readonly userService: UserService,
     private readonly reflector: Reflector,
   ) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    console.log('AuthGuard: Checking authentication...');
-    // Check if the route is marked as publics
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>('IS_PUBLIC', [
       context.getHandler(),
       context.getClass(),
     ]);
-    // If the route is public, allow access without authentication
     if (isPublic) {
-      console.log('AuthGuard: Route is public, skipping authentication.');
       return true;
     }
 
-    // Get the request object from the execution context
     const request = context.switchToHttp().getRequest();
-    const header = request.headers['authorization'];
-    // If the authorization header is missing, throw an UnauthorizedException
-    if (header === undefined || header === null) {
+    const header = request.headers['authorization'] as string | undefined;
+    if (!header) {
       throw new UnauthorizedException('Authorization header is missing');
     }
-    // Extract the token from the authorization header
-    const token = header && header.split(' ')[1];
-    //decode the token and verify its validity
-    const decoded = this.jwtService.verify(token, {
-      secret: process.env.JWT_SECRET || 'badminton-booking-dev-secret',
-    });
 
-    const { sub } = decoded;
-    const checkUser = this.userService.findUserById(sub);
+    const token = header.split(' ')[1];
+    if (!token) {
+      throw new UnauthorizedException('Token is missing');
+    }
 
-    if (!checkUser) {
+    let decoded: { sub?: number };
+    try {
+      decoded = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET || 'badminton-booking-dev-secret',
+      });
+    } catch (error) {
+      const name = error instanceof Error ? error.name : '';
+      if (name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token đã hết hạn');
+      }
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+
+    const userId = decoded.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
+    request.user = user;
     return true;
   }
 }
