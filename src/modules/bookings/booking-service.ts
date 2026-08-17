@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ListResponseDto } from 'src/common/dtos/list-respone.dto';
@@ -11,12 +11,15 @@ import {
   CourtNotFoundException,
 } from 'src/common/exceptions/court.exception';
 import {
+  VoucherMinOrderAmountNotMetException,
   VoucherNotActiveException,
   VoucherNotFoundException,
   VoucherUsageLimitExceededException,
 } from 'src/common/exceptions/voucher.exception';
 import {
   BookingAlreadyExistsException,
+  InvalidBookingTimeRangeException,
+  OrderDateInPastException,
   TimeSlotNotAvailableException,
 } from 'src/common/exceptions/booking.exception';
 import { CreateBookingDto } from './dtos/create-booking.dto';
@@ -75,7 +78,7 @@ export class BookingService {
     const end = createBookingDto.end;
 
     if (end <= start) {
-      throw new BadRequestException('End hour must be after start hour');
+      throw new InvalidBookingTimeRangeException();
     }
 
     const today = new Date();
@@ -83,7 +86,7 @@ export class BookingService {
     const orderDate = new Date(createBookingDto.orderDate);
     orderDate.setHours(0, 0, 0, 0);
     if (orderDate < today) {
-      throw new BadRequestException('Order date is in the past');
+      throw new OrderDateInPastException();
     }
 
     const court = await this.courtRepository.findOne({
@@ -111,7 +114,7 @@ export class BookingService {
         throw new VoucherUsageLimitExceededException();
       }
       if (createBookingDto.totalPrice < voucher.minOrderAmount) {
-        throw new BadRequestException('Order does not meet voucher minimum');
+        throw new VoucherMinOrderAmountNotMetException();
       }
     }
 

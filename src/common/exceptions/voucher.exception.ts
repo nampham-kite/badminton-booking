@@ -23,3 +23,9 @@ export class VoucherUsageLimitExceededException extends HttpException {
     super('Voucher usage limit exceeded', 400);
   }
 }
+
+export class VoucherMinOrderAmountNotMetException extends HttpException {
+  constructor() {
+    super('Order does not meet voucher minimum', 400);
+  }
+}
